@@ -1,0 +1,9 @@
+Hello, SmartBuilder!
+===>>  /home/dy/AndroidStudioProjects/tmp/PluginDemo/.idea/modules/mylibrary/PluginDemo.mylibrary.main.iml
+Change mylibrary.iml order
+===>>  component
+===>>  component
+===>> remove sdk node: orderEntry[attributes={type=jdk, jdkName=Android API 33, extension level 3 Platform, jdkType=Android SDK}; value=[]]
+===>> append sdk node: orderEntry[attributes={type=jdk, jdkName=Android API 33, extension level 3 Platform, jdkType=Android SDK}; value=[]]
+===>>  保存修改
+===>>  删除多余的空行
