@@ -91,12 +91,12 @@ public class PackageManagerHelper {
     public void deletePackage(String pkgName) {
         mActionType = ACTION_TYPE_UNINSTALL;
 
-        int unInstallFlags = PackageManager.DELETE_ALL_USERS;
-
-        final LocalIntentReceiver localReceiver = new LocalIntentReceiver();
-        mPackageInstaller.uninstall(pkgName, unInstallFlags | PackageManager.DELETE_ALL_USERS, localReceiver.getIntentSender());
-
         Thread t = new Thread(() -> {
+            int unInstallFlags = PackageManager.DELETE_ALL_USERS;
+
+            final LocalIntentReceiver localReceiver = new LocalIntentReceiver();
+            mPackageInstaller.uninstall(pkgName, unInstallFlags | PackageManager.DELETE_ALL_USERS, localReceiver.getIntentSender());
+
             Intent result = localReceiver.getResult();
             int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE);
             if (mActionListener != null) {
@@ -170,11 +170,14 @@ public class PackageManagerHelper {
     public void installFromAssert(String assetName) {
         Log.w(TAG, "installPackage pkg: " + assetName);
 
-        try (InputStream is = mContext.getAssets().open(assetName)) {
-            installFromInputStream(is);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Thread t = new Thread(() -> {
+            try (InputStream is = mContext.getAssets().open(assetName)) {
+                installFromInputStream(is);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        t.start();
     }
 
     public void installPackage(File apkFilePath) {
