@@ -22,4 +22,12 @@
         android:text="Delete APK"
         tools:ignore="HardcodedText" />
 
+    <Button
+        android:id="@+id/execute_cmd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:text="Execute Command"
+        tools:ignore="HardcodedText" />
+
 </LinearLayout>

@@ -26,6 +26,11 @@ class InstallApkDemoActivity : AppCompatActivity() {
         findViewById<View>(R.id.uninstall_sync).setOnClickListener {
             mPackageManagerHelper?.deletePackage("com.smartisan.notes")
         }
+        findViewById<View>(R.id.execute_cmd).setOnClickListener {
+            CmdManager.executeShellCommand("ls /sdcard/").also {
+                Log.d(TAG, "executeShellCommand: $it")
+            }
+        }
     }
 
 
