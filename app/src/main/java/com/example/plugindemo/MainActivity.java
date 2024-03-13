@@ -3,6 +3,9 @@ package com.example.plugindemo;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageInstaller;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
@@ -20,5 +23,8 @@ public class MainActivity extends AppCompatActivity {
         Context context = getApplicationContext();
         Log.d("MainActivity", "" + context.canStartActivityForResult());
         textView.setText("" + context.canStartActivityForResult());
+
+        PackageManager packageManager = context.getPackageManager();
+        PackageInstaller installer = packageManager.getPackageInstaller();
     }
 }

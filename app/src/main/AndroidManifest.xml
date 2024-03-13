@@ -3,6 +3,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:sharedUserId="android.uid.system">
 
+    <!--读写外部存储权限-->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!--允许装载和卸载文件系统权限-->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- 安装应用的权限（8.0及以上会需要用户手动打开允许安装未知应用的权限，但在provider_paths的配置路径里，可以配置不需要用户手动打开权限，也可跳转自动安装）-->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"
+        tools:ignore="ProtectedPermissions" />
+    <!--应用卸载权限-->
+    <uses-permission android:name="permission.REQUEST_DELETE_PACKAGES" />
+    <uses-permission
+        android:name="android.permission.DELETE_PACKAGES"
+        tools:ignore="ProtectedPermissions" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -13,9 +26,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PluginDemo"
         tools:targetApi="31">
-        <activity
+<!--        <activity
             android:name=".MainActivity"
             android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>-->
+
+        <activity android:name=".installapk.InstallApkSessionApi"
+            android:exported="true"
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
