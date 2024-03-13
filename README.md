@@ -1,3 +1,20 @@
+## 安装JADX
+```shell
+https://github.com/skylot/jadx
+# 确保jadx命令在PATH中
+```
+
+## 安装JDK
+```shell
+# 安装JDK, 并设置环境变量
+export JAVA_HOME={YOUR_JDK_HOME}
+export JRE_HOME=$JAVA_HOME/jre
+export CLASSPATH=$CLASSPATH:$JAVA_HOME/lib:$JAVA_HOME/jre/lib
+export PATH=$JAVA_HOME/bin:$JAVA_HOME/jre/bin:$PATH:$HOME/bin
+
+# 确保java、jar、keytool命令在PATH中
+```
+
 ## 下载AOSP源码（Android12举例）
 
 ```shell
