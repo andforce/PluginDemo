@@ -1,35 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <Button
-        android:layout_marginTop="100dp"
-        android:id="@+id/install"
-        android:text="安装"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
 
     <Button
-        android:layout_marginTop="100dp"
-        android:id="@+id/uninstall"
-        android:text="卸载"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <Button
-        android:layout_marginTop="100dp"
         android:id="@+id/install_sync"
-        android:text="同步安装"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:text="Install APK"
+        tools:ignore="HardcodedText" />
 
     <Button
-        android:layout_marginTop="100dp"
         android:id="@+id/uninstall_sync"
-        android:text="同步卸载"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:text="Delete APK"
+        tools:ignore="HardcodedText" />
 
 </LinearLayout>

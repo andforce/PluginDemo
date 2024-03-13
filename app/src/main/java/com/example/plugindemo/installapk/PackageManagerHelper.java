@@ -20,137 +20,125 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 
 public class PackageManagerHelper {
-    private static final String TAG = "PackageMgrCompat_v28_later";
-    private Context mContext;
-    private PackageManager mPackageManager;
+    private static final String TAG = "PackageManagerHelper";
+    private final Context mContext;
+    private final PackageManager mPackageManager;
+    private final PackageInstaller mPackageInstaller;
+
+    private int ACTION_TYPE_UNKNOWN = -1;
+    private int ACTION_TYPE_INSTALL = 1;
+    private int ACTION_TYPE_UNINSTALL = 2;
+
+    private int mActionType = ACTION_TYPE_UNKNOWN;
+
+    private Listener mActionListener;
+    private PackageInstaller.Session mSession = null;
+
+    public interface Listener {
+        void onActionFinished(int actionType, boolean success);
+    }
 
     public PackageManagerHelper(Context context) {
-        mContext = context;
+        mContext = context.getApplicationContext();
         mPackageManager = context.getPackageManager();
-
+        mPackageInstaller = mPackageManager.getPackageInstaller();
     }
 
+    public void registerListener(Listener listener) {
+        mPackageInstaller.registerSessionCallback(deleteCallback, mContext.getMainThreadHandler());
+        mActionListener = listener;
+    }
 
-    public boolean deletePackage(String pkgName, int unInstallFlags) {
-        final LocalIntentReceiver localReceiver = new LocalIntentReceiver();
-        getPi().uninstall(pkgName,
-                unInstallFlags | PackageManager.DELETE_ALL_USERS,
-                localReceiver.getIntentSender());
-        final Intent result = localReceiver.getResult();
-        synchronized (localReceiver) {
-            final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
-                    PackageInstaller.STATUS_FAILURE);
-            if (status != PackageInstaller.STATUS_SUCCESS) {
-                Log.e(TAG, "UnInstallation should have succeeded, but got code "
-                        + status);
-                return false;
-            } else {
-                Log.e(TAG, "UnInstallation  have succeeded");
-                return true;
+    public void unregisterListener() {
+        mActionListener = null;
+        mPackageInstaller.unregisterSessionCallback(deleteCallback);
+    }
+
+    private final PackageInstaller.SessionCallback deleteCallback = new PackageInstaller.SessionCallback() {
+        @Override
+        public void onCreated(int sessionId) {
+            Log.d(TAG, "onCreated: " + sessionId);
+        }
+
+        @Override
+        public void onBadgingChanged(int sessionId) {
+            Log.d(TAG, "onBadgingChanged: " + sessionId);
+        }
+
+        @Override
+        public void onActiveChanged(int sessionId, boolean active) {
+            Log.d(TAG, "onActiveChanged: " + sessionId + ", active: " + active);
+        }
+
+        @Override
+        public void onProgressChanged(int sessionId, float progress) {
+            Log.d(TAG, "onProgressChanged: " + sessionId + ", progress: " + progress);
+        }
+
+        @Override
+        public void onFinished(int sessionId, boolean success) {
+            Log.d(TAG, "onFinished: " + sessionId + ", success: " + success);
+            if (mActionListener != null) {
+                mActionListener.onActionFinished(mActionType, success);
+            }
+            if (mSession != null) {
+                mSession.close();
+                mSession = null;
             }
         }
+    };
+
+    public void deletePackage(String pkgName) {
+        mActionType = ACTION_TYPE_UNINSTALL;
+
+        int unInstallFlags = PackageManager.DELETE_ALL_USERS;
+
+        final LocalIntentReceiver localReceiver = new LocalIntentReceiver();
+        mPackageInstaller.uninstall(pkgName, unInstallFlags | PackageManager.DELETE_ALL_USERS, localReceiver.getIntentSender());
+
+        Thread t = new Thread(() -> {
+            Intent result = localReceiver.getResult();
+            int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE);
+            if (mActionListener != null) {
+                mActionListener.onActionFinished(ACTION_TYPE_UNINSTALL, status == PackageInstaller.STATUS_SUCCESS);
+            }
+        });
+        t.start();
     }
 
-    public int installFromAssert(String name) {
-        Log.w(TAG, "installPackage pkg: " + name);
+    public void installFromInputStream(InputStream inputStream) {
+        mActionType = ACTION_TYPE_INSTALL;
+
 
         PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                 PackageInstaller.SessionParams.MODE_FULL_INSTALL);
 
-        PackageInstaller.Session session = null;
         // 创建一个Session
         try {
-            int sessionId = getPi().createSession(params);
+            int sessionId = mPackageInstaller.createSession(params);
             // 建立和PackageManager的socket通道，Android中的通信不仅仅有Binder还有很多其它的
-            session = getPi().openSession(sessionId);
-            addApkToInstallSession(name, session);
+            mSession = mPackageInstaller.openSession(sessionId);
+            processInputStream(inputStream, inputStream.available(), mSession);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
-            return PackageManager.INSTALL_FAILED_INVALID_APK;
         }
 
+        if (mSession == null) {
+            return;
+        }
         final LocalIntentReceiver localReceiver = new LocalIntentReceiver();
-        session.commit(localReceiver.getIntentSender());
-        final Intent result = localReceiver.getResult();
-        synchronized (localReceiver) {
-            final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
-                    PackageInstaller.STATUS_FAILURE);
-            if (session != null) {
-                session.close();
-            }
-            if (status != PackageInstaller.STATUS_SUCCESS) {
-                Log.e(TAG, "Installation should have succeeded, but got code "
-                        + status);
-                return status;
-            } else {
-                Log.e(TAG, "Installation  have succeeded");
-                return status;
-            }
-        }
-    }
-    public int installPackage(File apkFilePath) {
-        Log.w(TAG, "installPackage pkg: " + apkFilePath);
-
-        PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
-                PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-
-        PackageInstaller.Session session = null;
-        // 创建一个Session
-        try {
-            int sessionId = getPi().createSession(params);
-            // 建立和PackageManager的socket通道，Android中的通信不仅仅有Binder还有很多其它的
-            session = getPi().openSession(sessionId);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return PackageManager.INSTALL_FAILED_INVALID_APK;
-        }
-        addApkToInstallSession(apkFilePath, session);
-        final LocalIntentReceiver localReceiver = new LocalIntentReceiver();
-        session.commit(localReceiver.getIntentSender());
-        final Intent result = localReceiver.getResult();
-        synchronized (localReceiver) {
-            final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
-                    PackageInstaller.STATUS_FAILURE);
-            if (session != null) {
-                session.close();
-            }
-            if (status != PackageInstaller.STATUS_SUCCESS) {
-                Log.e(TAG, "Installation should have succeeded, but got code "
-                        + status);
-                return status;
-            } else {
-                Log.e(TAG, "Installation  have succeeded");
-                return status;
-            }
-        }
-
+        mSession.commit(localReceiver.getIntentSender());
     }
 
-    private void addApkToInstallSession(String assetName, PackageInstaller.Session session)
-            throws IOException {
-        // It's recommended to pass the file size to openWrite(). Otherwise installation may fail
-        // if the disk is almost full.
-        try (OutputStream packageInSession = session.openWrite("package", 0, -1);
-             InputStream is = mContext.getAssets().open(assetName)) {
-            byte[] buffer = new byte[16384];
-            int n;
-            while ((n = is.read(buffer)) >= 0) {
-                packageInSession.write(buffer, 0, n);
-            }
-        }
-    }
-
-    private boolean addApkToInstallSession(File apkFilePath,
-                                           PackageInstaller.Session session) {
+    private boolean processInputStream(InputStream inputStream, long length, PackageInstaller.Session session) {
         InputStream in = null;
         OutputStream out = null;
         boolean success = false;
         try {
-            out = session.openWrite("base.apk", 0, apkFilePath.length());
-            in = new FileInputStream(apkFilePath);
-            int total = 0, c;
+            out = session.openWrite("base.apk", 0, length);
+            in = inputStream;
+            int total = 0;
+            int c;
             byte[] buffer = new byte[1024 * 1024];
             while ((c = in.read(buffer)) != -1) {
                 total += c;
@@ -177,6 +165,24 @@ public class PackageManagerHelper {
             }
         }
         return success;
+    }
+
+    public void installFromAssert(String assetName) {
+        Log.w(TAG, "installPackage pkg: " + assetName);
+
+        try (InputStream is = mContext.getAssets().open(assetName)) {
+            installFromInputStream(is);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void installPackage(File apkFilePath) {
+        try (InputStream in = new FileInputStream(apkFilePath)) {
+            installFromInputStream(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static class LocalIntentReceiver {
@@ -206,14 +212,5 @@ public class PackageManagerHelper {
                 throw new RuntimeException(e);
             }
         }
-    }
-
-
-    private PackageManager getPm() {
-        return mContext.getPackageManager();
-    }
-
-    private PackageInstaller getPi() {
-        return getPm().getPackageInstaller();
     }
 }
