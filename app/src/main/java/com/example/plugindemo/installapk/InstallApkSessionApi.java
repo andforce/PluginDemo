@@ -21,10 +21,8 @@ import com.example.plugindemo.R;
 
 
 public class InstallApkSessionApi extends Activity {
-    private static final String PACKAGE_INSTALLED_ACTION =
-            "com.xxx.install";
-    private static final String PACKAGE_UNINSTALLED_ACTION =
-            "com.xxx.uninstall";
+    private static final String PACKAGE_INSTALLED_ACTION = "com.xxx.install";
+    private static final String PACKAGE_UNINSTALLED_ACTION = "com.xxx.uninstall";
     private static final String TAG = "install";
 
     @Override
@@ -56,6 +54,32 @@ public class InstallApkSessionApi extends Activity {
                 try {
                     //获取PackageInstaller对象
                     PackageInstaller packageInstaller = getPackageManager().getPackageInstaller();
+                    packageInstaller.registerSessionCallback(new PackageInstaller.SessionCallback() {
+                        @Override
+                        public void onCreated(int sessionId) {
+                            Log.e(TAG, "onCreated sessionId: " + sessionId);
+                        }
+
+                        @Override
+                        public void onBadgingChanged(int sessionId) {
+
+                        }
+
+                        @Override
+                        public void onActiveChanged(int sessionId, boolean active) {
+
+                        }
+
+                        @Override
+                        public void onProgressChanged(int sessionId, float progress) {
+                            Log.e(TAG, "Silent onProgressChanged : " + sessionId + " " + progress );
+                        }
+
+                        @Override
+                        public void onFinished(int sessionId, boolean success) {
+                            Log.e(TAG, "Silent onFinished : " + sessionId + " " + success );
+                        }
+                    });
                     PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                             PackageInstaller.SessionParams.MODE_FULL_INSTALL);
 
@@ -121,6 +145,11 @@ public class InstallApkSessionApi extends Activity {
     protected void onNewIntent(Intent intent) {
         Bundle extras = intent.getExtras();
         Log.e(TAG, intent.toString());
+
+        if (extras == null) {
+            return;
+        }
+
         if (PACKAGE_INSTALLED_ACTION.equals(intent.getAction())) {
             Log.e(TAG, intent.getAction());
             int status = extras.getInt(PackageInstaller.EXTRA_STATUS);
@@ -201,7 +230,7 @@ public class InstallApkSessionApi extends Activity {
     public void uninstall(String packageName) {
         Intent broadcastIntent = new Intent(this, InstallApkSessionApi.class);
         broadcastIntent.setAction(PACKAGE_UNINSTALLED_ACTION);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, broadcastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, broadcastIntent, PendingIntent.FLAG_IMMUTABLE);
         PackageInstaller packageInstaller = getPackageManager().getPackageInstaller();
         packageInstaller.uninstall(packageName, pendingIntent.getIntentSender());
 
