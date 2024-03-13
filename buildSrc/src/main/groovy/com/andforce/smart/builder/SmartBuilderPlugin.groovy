@@ -8,12 +8,16 @@ import org.gradle.api.tasks.compile.JavaCompile
 
 class SmartBuilderPlugin implements Plugin<Project> {
 
+    def ENABLE_LOG = false
 
     @Override
     void apply(Project project) {
 
         // 在根目录创建文件
         def file = project.file("plugin_log.txt")
+        if (!ENABLE_LOG) {
+            file.delete()
+        }
 
         def full_sdk = project.rootProject.file('full_sdk.jar')
 
@@ -54,18 +58,23 @@ class SmartBuilderPlugin implements Plugin<Project> {
             // 获取rootProject根路径
             def imlFileName = project.rootProject.name + '.' + project.name + '.main.iml'
             def imlFile = project.rootProject.file(".idea/modules/" + project.name + "/" + imlFileName)
-            file.append('===>>  ' + imlFile.absolutePath + '\n')
+            if (ENABLE_LOG) {
+                file.append('===>>  ' + imlFile.absolutePath + '\n')
+            }
 
 
-            println 'Change ' + project.name + '.iml order'
-            file.append('Change ' + project.name + '.iml order\n')
+            if (ENABLE_LOG) {
+                file.append('===>>  Change ' + project.name + '.iml order\n')
+            }
             try {
                 def parsedXml = (new XmlParser()).parse(imlFile)
 
                 def allChildren = parsedXml.children()
                 for (int i = 0; i < allChildren.size(); i++) {
                     Object component = allChildren.get(i)
-                    file.append('===>>  ' + component.name() + '\n')
+                    if (ENABLE_LOG) {
+                        file.append('===>>  ' + component.name() + '\n')
+                    }
                     if (component.name() != 'component') {
                         continue
                     }
@@ -73,22 +82,30 @@ class SmartBuilderPlugin implements Plugin<Project> {
                     List orderEntry = component.get("orderEntry")
                     def sdkNode = orderEntry.find { it.'@type' == 'jdk'}
                     if (sdkNode != null) {
-                        file.append('===>> remove sdk node: ' + sdkNode + '\n')
+                        if (ENABLE_LOG) {
+                            file.append('===>> remove sdk node: ' + sdkNode + '\n')
+                        }
                         component.remove(sdkNode)
 
-                        file.append('===>> append sdk node: ' + sdkNode + '\n')
+                        if (ENABLE_LOG) {
+                            file.append('===>> append sdk node: ' + sdkNode + '\n')
+                        }
                         component.append(sdkNode)
                         break
                     }
                 }
 
-                file.append('===>>  保存修改\n')
+                if (ENABLE_LOG) {
+                    file.append('===>>  保存修改\n')
+                }
                 def xml = new FileOutputStream(imlFile)
                 groovy.xml.XmlUtil.serialize(parsedXml, xml)
                 xml.flush()
                 xml.close()
 
-                file.append('===>>  删除多余的空行\n')
+                if (ENABLE_LOG) {
+                    file.append('===>>  删除多余的空行\n')
+                }
                 // 删除imlFile中的空行
                 def lines = imlFile.readLines()
                 imlFile.withWriter { writer ->
@@ -101,7 +118,9 @@ class SmartBuilderPlugin implements Plugin<Project> {
 
             } catch (FileNotFoundException e) {
                 // nop, iml not found
-                file.append('===>>  iml not found\n')
+                if (ENABLE_LOG) {
+                    file.append('===>>  ' + e + '\n')
+                }
             }
         }
     }

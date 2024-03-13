@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -40,6 +41,21 @@ public class InstallApkSessionApi extends Activity {
                     public void run() {
                         int result = compat.installFromAssert("notes.apk");
                         Log.e(TAG, "installFromAssert result: " + result);
+                    }
+                });
+                t.start();
+            }
+        });
+
+        findViewById(R.id.uninstall_sync).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PackageMgrCompat compat = new PackageMgrCompat(InstallApkSessionApi.this);
+                Thread t = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolean result = compat.deletePackage("com.smartisan.notes", PackageManager.DELETE_ALL_USERS);
+                        Log.e(TAG, "deletePackage result: " + result);
                     }
                 });
                 t.start();
