@@ -36,7 +36,7 @@
             </intent-filter>
         </activity>-->
 
-        <activity android:name=".installapk.InstallApkSessionApi"
+        <activity android:name=".installapk.InstallApkDemoActivity"
             android:exported="true"
             android:launchMode="singleInstance">
             <intent-filter>

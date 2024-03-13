@@ -19,12 +19,12 @@ import java.io.OutputStream;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 
-public class PackageMgrCompat {
+public class PackageManagerHelper {
     private static final String TAG = "PackageMgrCompat_v28_later";
     private Context mContext;
     private PackageManager mPackageManager;
 
-    public PackageMgrCompat(Context context) {
+    public PackageManagerHelper(Context context) {
         mContext = context;
         mPackageManager = context.getPackageManager();
 

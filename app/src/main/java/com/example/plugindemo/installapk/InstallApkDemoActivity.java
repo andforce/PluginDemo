@@ -21,7 +21,7 @@ import android.widget.Toast;
 import com.example.plugindemo.R;
 
 
-public class InstallApkSessionApi extends Activity {
+public class InstallApkDemoActivity extends Activity {
     private static final String PACKAGE_INSTALLED_ACTION = "com.xxx.install";
     private static final String PACKAGE_UNINSTALLED_ACTION = "com.xxx.uninstall";
     private static final String TAG = "install";
@@ -35,7 +35,7 @@ public class InstallApkSessionApi extends Activity {
         findViewById(R.id.install_sync).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                PackageMgrCompat compat = new PackageMgrCompat(InstallApkSessionApi.this);
+                PackageManagerHelper compat = new PackageManagerHelper(InstallApkDemoActivity.this);
                 Thread t = new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -50,7 +50,7 @@ public class InstallApkSessionApi extends Activity {
         findViewById(R.id.uninstall_sync).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                PackageMgrCompat compat = new PackageMgrCompat(InstallApkSessionApi.this);
+                PackageManagerHelper compat = new PackageManagerHelper(InstallApkDemoActivity.this);
                 Thread t = new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -108,8 +108,8 @@ public class InstallApkSessionApi extends Activity {
                     addApkToInstallSession("notes.apk", session);
 
                     // Create an install status receiver.
-                    Context context = InstallApkSessionApi.this;
-                    Intent intent = new Intent(context, InstallApkSessionApi.class);
+                    Context context = InstallApkDemoActivity.this;
+                    Intent intent = new Intent(context, InstallApkDemoActivity.class);
                     intent.setAction(PACKAGE_INSTALLED_ACTION);
                     PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
                     IntentSender statusReceiver = pendingIntent.getIntentSender();
@@ -244,7 +244,7 @@ public class InstallApkSessionApi extends Activity {
      * @param packageName
      */
     public void uninstall(String packageName) {
-        Intent broadcastIntent = new Intent(this, InstallApkSessionApi.class);
+        Intent broadcastIntent = new Intent(this, InstallApkDemoActivity.class);
         broadcastIntent.setAction(PACKAGE_UNINSTALLED_ACTION);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, broadcastIntent, PendingIntent.FLAG_IMMUTABLE);
         PackageInstaller packageInstaller = getPackageManager().getPackageInstaller();
