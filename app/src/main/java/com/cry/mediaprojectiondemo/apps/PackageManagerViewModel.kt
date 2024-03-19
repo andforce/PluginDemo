@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.plugindemo.installapk.PackageManagerHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -32,6 +33,17 @@ class PackageManagerViewModel: ViewModel()  {
                 }
             }
             _installedApps.value = list
+        }
+    }
+
+    fun uninstallApp(applicationContext: Context, appBean: AppBean) {
+        val helper = PackageManagerHelper(applicationContext).also {
+            it.deletePackage(appBean.packageName)
+        }
+        helper.registerListener { actionType, success ->
+            if (actionType == PackageManagerHelper.ACTION_TYPE_UNINSTALL && success) {
+                loadInstalledApps(applicationContext)
+            }
         }
     }
 }

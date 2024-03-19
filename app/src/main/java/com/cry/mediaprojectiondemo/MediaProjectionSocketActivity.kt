@@ -8,8 +8,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.andforce.socket.MouseEvent
+import com.android.internal.widget.RecyclerView.ItemDecoration
+import com.cry.mediaprojectiondemo.apps.AppBean
 import com.cry.mediaprojectiondemo.apps.InstalledAppAdapter
+import com.cry.mediaprojectiondemo.apps.OnUninstallClickListener
 import com.cry.mediaprojectiondemo.apps.PackageManagerViewModel
 import com.cry.mediaprojectiondemo.socket.SocketViewModel
 import com.cry.screenop.coroutine.RecordViewModel
@@ -42,7 +46,20 @@ class MediaProjectionSocketActivity : AppCompatActivity() {
 
         val adapter = InstalledAppAdapter(this.applicationContext)
         viewMainBinding.rvList.layoutManager = LinearLayoutManager(this)
-        viewMainBinding.rvList.adapter = adapter
+        // 设置上下间隔
+        viewMainBinding.rvList.addItemDecoration(object : RecyclerView.ItemDecoration() {
+            override fun getItemOffsets(outRect: android.graphics.Rect, view: android.view.View, parent: RecyclerView, state: RecyclerView.State) {
+                outRect.top = 10
+                outRect.bottom = 10
+            }
+        })
+        viewMainBinding.rvList.adapter = adapter.also {
+            it.setOnUninstallClickListener(object : OnUninstallClickListener {
+                override fun onUninstallClick(appBean: AppBean) {
+                    packageManagerViewModel.uninstallApp(applicationContext, appBean)
+                }
+            })
+        }
 
         packageManagerViewModel.installedApps.observe(this) {
             adapter.setData(it)

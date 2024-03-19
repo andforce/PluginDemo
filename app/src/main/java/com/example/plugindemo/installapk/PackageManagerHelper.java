@@ -25,9 +25,9 @@ public class PackageManagerHelper {
     private final PackageManager mPackageManager;
     private final PackageInstaller mPackageInstaller;
 
-    private int ACTION_TYPE_UNKNOWN = -1;
-    private int ACTION_TYPE_INSTALL = 1;
-    private int ACTION_TYPE_UNINSTALL = 2;
+    public static final int ACTION_TYPE_UNKNOWN = -1;
+    public static final int ACTION_TYPE_INSTALL = 1;
+    public static final int ACTION_TYPE_UNINSTALL = 2;
 
     private int mActionType = ACTION_TYPE_UNKNOWN;
 

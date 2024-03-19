@@ -10,10 +10,15 @@ import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.plugindemo.R
+import org.koin.android.ext.android.inject
 
 class InstalledAppAdapter(val context: Context): RecyclerView.Adapter<InstalledAppViewHolder>() {
 
     private val data: MutableList<AppBean> = mutableListOf()
+    private var listener: OnUninstallClickListener? = null
+    fun setOnUninstallClickListener(listener: OnUninstallClickListener) {
+        this.listener = listener
+    }
 
     @SuppressLint("NotifyDataSetChanged")
     fun setData(data: List<AppBean>) {
@@ -37,13 +42,19 @@ class InstalledAppAdapter(val context: Context): RecyclerView.Adapter<InstalledA
         appIcon.setImageDrawable(appBean.icon)
         val appName = holder.itemView.findViewById<TextView>(R.id.tv_app_name)
         appName.text = appBean.appName
+        appName.setTextColor(if (appBean.isSystem) context.resources.getColor(R.color.colorAccent) else context.resources.getColor(R.color.colorPrimary))
+
         val pkgName = holder.itemView.findViewById<TextView>(R.id.tv_app_package_name)
         pkgName.text = appBean.packageName
         val button = holder.itemView.findViewById<Button>(R.id.btn_uninstall)
         button.setOnClickListener {
-            // TODO: 卸载应用
+            listener?.onUninstallClick(appBean)
         }
     }
+}
+
+interface OnUninstallClickListener {
+    fun onUninstallClick(appBean: AppBean)
 }
 
 class InstalledAppViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
