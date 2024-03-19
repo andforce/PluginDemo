@@ -1,7 +1,6 @@
 package com.andforce.network
 
 import android.content.Context
-import android.os.Environment
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,12 +10,8 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
-import okhttp3.ResponseBody
-import okio.use
 import retrofit2.Retrofit
 import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
 
 class NetworkViewModel : ViewModel() {
     private val client = OkHttpClient.Builder()
@@ -52,41 +47,7 @@ class NetworkViewModel : ViewModel() {
                     Log.e("NetworkViewModel", "download error: $it")
                 }
             }.startDowload()
-
-//            saveFileToSdCard(context, name, call.body()!!).let {
-//                _stateFlow.value = it
-//            }
         }
 
-    }
-
-
-    private fun saveFileToSdCard(context: Context, name: String, body: ResponseBody): File? {
-        val apkFile = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)?.let {
-            File(it, name)
-        } ?: return null
-
-        var input: InputStream? = null
-        var fos: FileOutputStream? = null
-        try {
-            input = body.byteStream()
-            fos = FileOutputStream(apkFile)
-            fos.use { output ->
-                input.use { input ->
-                    val buffer = ByteArray(4 * 1024) // or other buffer size
-                    var read: Int
-                    while (input.read(buffer).also { read = it } != -1) {
-                        output.write(buffer, 0, read)
-                    }
-                    output.flush()
-                }
-            }
-            return apkFile
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            fos?.close()
-        }
-        return apkFile
     }
 }
