@@ -7,6 +7,42 @@ const path = require("path");
 
 const io = require('socket.io')(server)
 
+const multer = require('multer');
+
+// Set storage engine
+const storage = multer.diskStorage({
+    destination: './www/uploads/',
+    filename: function(req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+
+// Init upload，不检查文件类型
+const upload = multer({
+    storage: storage
+}).single('apk');
+
+// Upload image
+app.post('/upload', (req, res) => {
+    upload(req, res, (err) => {
+        if (err) {
+            console.log(err);
+            res.send('error');
+        } else {
+            console.log(req.file);
+            res.send('success');
+            // 通过socket.io发送消息
+            io.socket.emit('apk-upload', {
+                name: req.file.filename,
+                path: '/uploads/' + req.file.filename
+            });
+        }
+    });
+});
+
+
+
+
 //specify the html we will use
 app.use('/', express.static(__dirname + '/www'));
 

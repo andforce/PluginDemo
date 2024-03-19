@@ -6,3 +6,7 @@ interface MouseEventListener {
     fun onMove(mouseEvent: MouseEvent)
     fun onUp(mouseEvent: MouseEvent)
 }
+
+interface ApkEventListener {
+    fun onApk(apkName: ApkEvent)
+}

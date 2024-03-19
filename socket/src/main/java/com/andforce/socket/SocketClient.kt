@@ -10,13 +10,20 @@ class SocketClient(url: String) {
     private var socket: Socket? = null
 
     private var mouseEventListener: MouseEventListener? = null
+    private var apkEventListener: ApkEventListener? = null
 
     fun registerMouseEventListener(listener: MouseEventListener) {
         mouseEventListener = listener
     }
+    fun registerApkEventListener(listener: ApkEventListener) {
+        apkEventListener = listener
+    }
 
     fun unRegisterMouseEventListener() {
         mouseEventListener = null
+    }
+    fun unRegisterApkEventListener() {
+        apkEventListener = null
     }
 
     init {
@@ -64,13 +71,14 @@ class SocketClient(url: String) {
             val down = MouseEvent.Move(3, data.getInt("x"), data.getInt("y"), data.getInt("width"), data.getInt("height"))
             mouseEventListener?.onMove(down)
         })
-        // mouse-click
-//        socket?.on("mouse-click", Emitter.Listener { args ->
-//            Log.d("SocketClient", "mouse-click" + args[0].toString())
-//            val data = args[0] as JSONObject
-//            val down = MouseEvent.Click(data.getInt("x"), data.getInt("y"), data.getInt("width"), data.getInt("height"))
-//            mouseEventListener?.onClick(down)
-//        })
+
+        socket?.on("apk-upload", Emitter.Listener { args ->
+            Log.d("SocketClient", "apk-upload" + args[0].toString())
+            val data = args[0] as JSONObject
+            val down = ApkEvent(data.getString("name"), data.getString("path"))
+            apkEventListener?.onApk(down)
+        })
+
         socket?.connect()
     }
     fun send(bitmapArray: ByteArray) {

@@ -25,16 +25,28 @@ HiChat.prototype = {
             event.preventDefault();
         });
 
-        // // Add the click event listener
-        // image.addEventListener('click', function(event) {
-        //     console.log("start to emit [click] event");
-        //     that.socket.emit('mouse-click', {
-        //         x: event.offsetX,
-        //         y: event.offsetY,
-        //         width: image.clientWidth,
-        //         height: image.clientHeight
-        //     });
-        // });
+        var dropzone = document.getElementById('dropzone');
+
+        dropzone.addEventListener('dragover', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        });
+
+        dropzone.addEventListener('drop', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            var files = e.dataTransfer.files; // 获取拖拽的文件列表
+
+            // 取第一个文件，上传到服务器
+            var file = files[0];
+            console.log('file', file);
+            var formData = new FormData();
+            formData.append('apk', file);
+            var xhr = new XMLHttpRequest();
+            xhr.open('post', '/upload', true);
+            xhr.send(formData);
+        });
 
         // Add the mousedown event listener
         image.addEventListener('mousedown', function(event) {
