@@ -27,7 +27,7 @@ class InstallApkDemoActivity : AppCompatActivity() {
             mPackageManagerHelper?.deletePackage("com.smartisan.notes")
         }
         findViewById<View>(R.id.execute_cmd).setOnClickListener {
-            CmdManager.executeShellCommand("ls /sdcard/").also {
+            CmdManager.executeShellCommand("pm list package").also {
                 Log.d(TAG, "executeShellCommand: $it")
             }
         }
