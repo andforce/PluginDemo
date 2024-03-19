@@ -10,7 +10,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.andforce.socket.MouseEvent
-import com.android.internal.widget.RecyclerView.ItemDecoration
 import com.cry.mediaprojectiondemo.apps.AppBean
 import com.cry.mediaprojectiondemo.apps.InstalledAppAdapter
 import com.cry.mediaprojectiondemo.apps.OnUninstallClickListener

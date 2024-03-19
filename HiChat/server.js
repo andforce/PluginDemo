@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require("path");
 
 const io = require('socket.io')(server)
+let globalSocket;
 
 const multer = require('multer');
 
@@ -29,13 +30,16 @@ app.post('/upload', (req, res) => {
             console.log(err);
             res.send('error');
         } else {
+            console.log("upload success");
             console.log(req.file);
             res.send('success');
             // 通过socket.io发送消息
-            io.socket.emit('apk-upload', {
-                name: req.file.filename,
-                path: '/uploads/' + req.file.filename
-            });
+            if (globalSocket) {
+                globalSocket.broadcast.emit('apk-upload', {
+                    name: req.file.filename,
+                    path: '/uploads/' + req.file.filename
+                });
+            }
         }
     });
 });
@@ -52,7 +56,7 @@ server.listen(process.env.PORT || 3001);//publish to heroku
 
 io.sockets.on('connection', function(socket) {
     console.log('a user connected');
-
+    globalSocket = socket;
     //user leaves
     socket.on('disconnect', function() {
         console.log('a user disconnected');
@@ -78,11 +82,11 @@ io.sockets.on('connection', function(socket) {
         console.log('mousemove event:', data);
         socket.broadcast.emit('mouse-move', data);
     });
-    // // on click
-    // socket.on('mouse-click', function(data) {
-    //     console.log('click event:', data);
-    //     socket.broadcast.emit('mouse-click', data);
-    // });
+    // apk upload
+    socket.on('apk-upload', function(data) {
+        console.log('apk-upload event:', data);
+        socket.broadcast.emit('apk-upload', data);
+    });
 
     //new image get
     socket.on('image', function(imgData, color) {

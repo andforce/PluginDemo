@@ -1,6 +1,7 @@
 package com.cry.mediaprojectiondemo
 
 import android.app.Application
+import com.andforce.network.NetworkViewModel
 import com.cry.mediaprojectiondemo.apps.PackageManagerViewModel
 import com.cry.mediaprojectiondemo.socket.SocketViewModel
 import com.cry.screenop.coroutine.RecordViewModel
@@ -20,6 +21,7 @@ class App : Application() {
             single { RecordViewModel(MainScope()) }
             single { SocketViewModel() }
             single { PackageManagerViewModel() }
+            single { NetworkViewModel() }
         }
 
         startKoin {

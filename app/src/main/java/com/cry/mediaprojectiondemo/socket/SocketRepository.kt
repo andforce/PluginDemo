@@ -1,5 +1,7 @@
 package com.cry.mediaprojectiondemo.socket
 
+import com.andforce.socket.ApkEvent
+import com.andforce.socket.ApkEventListener
 import com.andforce.socket.MouseEvent
 import com.andforce.socket.MouseEventListener
 import com.andforce.socket.SocketClient
@@ -30,4 +32,15 @@ class SocketRepository {
         }
     }
 
+    suspend fun listenApkEvent(socketClient: SocketClient): Flow<ApkEvent> = callbackFlow {
+        val listener = object : ApkEventListener {
+            override fun onApk(apkName: ApkEvent) {
+                trySend(apkName)
+            }
+        }
+        socketClient.registerApkEventListener(listener)
+        awaitClose {
+            socketClient.unRegisterApkEventListener()
+        }
+    }
 }

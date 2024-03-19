@@ -12,6 +12,7 @@ import android.media.projection.MediaProjectionManager
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
+import com.andforce.network.NetworkViewModel
 import com.andforce.socket.SocketClient
 import com.cry.mediaprojectiondemo.socket.SocketViewModel
 import com.cry.screenop.coroutine.RecordViewModel
@@ -30,8 +31,9 @@ class CastService: Service() {
     private var mpm: MediaProjectionManager? = null
     private val viewModel: RecordViewModel by inject()
     private val socketViewModel: SocketViewModel by inject()
+    private val networkViewModel: NetworkViewModel by inject()
 
-    private var socketClient: SocketClient = SocketClient("http://10.66.32.51:3001")
+    private var socketClient: SocketClient = SocketClient("http://192.168.2.183:3001")
     companion object {
         const val NOTIFICATION_ID = 1
         // 启动方法
@@ -82,7 +84,26 @@ class CastService: Service() {
 
         socketClient.startConnection()
 
+
+
+        mainScope.launch {
+            socketViewModel.apkEventFlow.collect {
+                Log.d("CastService", "collect ApkEvent: $it")
+                it?.let {
+                    networkViewModel.downloadApk(applicationContext, it.name, it.path)
+                }
+            }
+        }
+
+        mainScope.launch {
+            networkViewModel.stateFlow.collect {
+                Log.d("CastService", "start install : $it")
+                Toast.makeText(applicationContext, "start install : $it", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         socketViewModel.listenEvent(socketClient)
+        socketViewModel.listenApkEvent(socketClient)
     }
 
     override fun onDestroy() {

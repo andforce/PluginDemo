@@ -42,8 +42,8 @@ class AutoTouchService : AccessibilityService() {
         finalWidthPixels = (metrics.widthPixels)
         finalHeightPixels = (metrics.heightPixels)
 
-
         job = GlobalScope.launch {
+
             socketViewModel.eventFlow.buffer(capacity = 1024).collect {
 
                 it?.let {
