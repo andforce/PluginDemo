@@ -1,58 +1,29 @@
 plugins {
-    id 'com.android.application'
+    id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
 }
 
-apply plugin: 'com.andforce.smart.builder'
-
 android {
-    namespace 'com.example.plugindemo'
+    namespace 'com.andforce.socket'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.plugindemo"
         minSdk 28
-        //noinspection ExpiredTargetSdkVersion,OldTargetApi
-        targetSdk 28
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    signingConfigs {
-        config {
-            storeFile project.file("../platform.jks")
-            storePassword "android"
-            keyAlias "android"
-            keyPassword "android"
-        }
-    }
-
-    // viewBinding
-    buildFeatures {
-        viewBinding true
+        consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.config
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-        debug {
-            minifyEnabled false
-            signingConfig signingConfigs.config
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
     kotlinOptions {
         jvmTarget = '1.8'
     }
@@ -63,9 +34,11 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    implementation project(path: ':mylibrary')
+    implementation('io.socket:socket.io-client:2.1.0') {
+        // excluding org.json which is provided by Android
+        exclude group: 'org.json', module: 'json'
+    }
 
     // 引入协程
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.23"
@@ -75,15 +48,6 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
-
-    // Koin for Android
-//    implementation "org.koin:koin-android:3.5.0"
-//    implementation "io.insert-koin:koin-androidx-viewmodel:3.5.0"
-//    // https://mvnrepository.com/artifact/io.insert-koin/koin-android
-    implementation "io.insert-koin:koin-core:3.5.0"
-    implementation 'io.insert-koin:koin-android:3.5.0'
-    implementation project(path: ':screenop')
-    implementation project(path: ':socket')
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
