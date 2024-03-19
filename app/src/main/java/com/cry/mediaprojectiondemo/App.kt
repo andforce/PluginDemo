@@ -1,6 +1,7 @@
 package com.cry.mediaprojectiondemo
 
 import android.app.Application
+import com.cry.mediaprojectiondemo.apps.PackageManagerViewModel
 import com.cry.mediaprojectiondemo.socket.SocketViewModel
 import com.cry.screenop.coroutine.RecordViewModel
 import kotlinx.coroutines.MainScope
@@ -18,6 +19,7 @@ class App : Application() {
             // 将 MyViewModel 定义为全局单例
             single { RecordViewModel(MainScope()) }
             single { SocketViewModel() }
+            single { PackageManagerViewModel() }
         }
 
         startKoin {

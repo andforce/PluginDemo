@@ -7,7 +7,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.andforce.socket.MouseEvent
+import com.cry.mediaprojectiondemo.apps.InstalledAppAdapter
+import com.cry.mediaprojectiondemo.apps.PackageManagerViewModel
 import com.cry.mediaprojectiondemo.socket.SocketViewModel
 import com.cry.screenop.coroutine.RecordViewModel
 import com.example.plugindemo.databinding.MediaprojectionActivityMainBinding
@@ -31,14 +34,21 @@ class MediaProjectionSocketActivity : AppCompatActivity() {
 
     private val recordViewModel: RecordViewModel by inject()
     private val socketViewModel: SocketViewModel by inject()
+    private val packageManagerViewModel: PackageManagerViewModel by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewMainBinding.root)
-//        viewMainBinding.root.setOnTouchListener { v, event ->
-//            Log.d("MediaProjectionSocketActivity", "onCreate: $event")
-//            true
-//        }
+
+        val adapter = InstalledAppAdapter(this.applicationContext)
+        viewMainBinding.rvList.layoutManager = LinearLayoutManager(this)
+        viewMainBinding.rvList.adapter = adapter
+
+        packageManagerViewModel.installedApps.observe(this) {
+            adapter.setData(it)
+        }
+
+        packageManagerViewModel.loadInstalledApps(this.applicationContext)
 
         Log.d("RecordViewModel", "RecordViewModel1: $recordViewModel")
 
@@ -82,9 +92,6 @@ class MediaProjectionSocketActivity : AppCompatActivity() {
             socketViewModel.eventFlow.collect {
                 it?.let {
                     when (it) {
-//                    is MouseEvent.None -> {
-//                        viewMainBinding.tvInfo.text = "None"
-//                    }
                         is MouseEvent.Down -> {
                             viewMainBinding.tvInfo.text = "MouseDown"
                         }
@@ -94,10 +101,6 @@ class MediaProjectionSocketActivity : AppCompatActivity() {
                         is MouseEvent.Up -> {
                             viewMainBinding.tvInfo.text = "MouseUp"
                         }
-
-//                    is MouseEvent.Click -> {
-//                        viewMainBinding.tvInfo.text = "MouseClick"
-//                    }
                     }
                 }
             }
