@@ -22,14 +22,13 @@ public class InjectEventHelper {
     IWindowManager mWndManager = IWindowManager.Stub.asInterface(mWindowBinder);
     Instrumentation m_Instrumentation = new Instrumentation();
 
-    private int finalWidthPixels = 1;
-    private int finalHeightPixels = 1;
     private Path path = new Path();
     private ArrayList<Pair<Float, Float>> points = new ArrayList<>();
     private long lastTimeStamp = 0L;
 
+    private static final boolean USE_SYSTEM = true;
 
-    private void injectPointerEvent(AccessibilityService service, int action, float pozx, float pozy) {
+    private void injectPointerEvent(int action, float pozx, float pozy) {
         try {
             MotionEvent motionEvent = MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), action, pozx, pozy, 0);
             m_Instrumentation.sendPointerSync(motionEvent);
@@ -40,6 +39,10 @@ public class InjectEventHelper {
     }
 
     public void injectTouchDown(AccessibilityService service, int screenW, int screenH, float fromRealX, float fromRealY) {
+        if (USE_SYSTEM) {
+            injectPointerEvent(MotionEvent.ACTION_DOWN, fromRealX, fromRealY);
+            return;
+        }
         lastTimeStamp = System.currentTimeMillis();
         path = new Path();
         points.clear();
@@ -47,18 +50,23 @@ public class InjectEventHelper {
         points.add(new Pair<>(fromRealX, fromRealY));
         Log.d("AutoTouchService", "DOWN points: $points, path: $path");
 
-        //injectPointerEvent(MotionEvent.ACTION_DOWN, pozx, pozy);
     }
 
     public void injectTouchMove(AccessibilityService service, int screenW, int screenH, float fromRealX, float fromRealY) {
+        if (USE_SYSTEM) {
+            injectPointerEvent(MotionEvent.ACTION_MOVE, fromRealX, fromRealY);
+            return;
+        }
         path.lineTo(fromRealX, fromRealY);
         points.add(new Pair<>(fromRealX, fromRealY));
         Log.d("AutoTouchService", "MOVE points: $points, path: $path");
-
-        //injectPointerEvent(MotionEvent.ACTION_MOVE, pozx, pozy);
     }
 
     public void injectTouchUp(AccessibilityService service, int screenW, int screenH, float fromRealX, float fromRealY) {
+        if (USE_SYSTEM) {
+            injectPointerEvent(MotionEvent.ACTION_UP, fromRealX, fromRealY);
+            return;
+        }
         if (path == null || path.isEmpty()) {
             return;
         }
@@ -76,7 +84,6 @@ public class InjectEventHelper {
         dispatchMouseGesture(service, path, 0, duration);
         lastTimeStamp = 0;
         Log.d("AutoTouchService", "UP points: $points ,duration: $duration, path: $path");
-        //injectPointerEvent(MotionEvent.ACTION_MOVE, fromRealX, fromRealY);
     }
 
 
