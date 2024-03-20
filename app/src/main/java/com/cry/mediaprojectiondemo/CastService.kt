@@ -38,11 +38,15 @@ class CastService: Service() {
     companion object {
         const val NOTIFICATION_ID = 1
         // 启动方法
-        fun startService(context: Context, data: Intent, code: Int) {
+        fun startService(context: Context, isForeground: Boolean, data: Intent, code: Int) {
             val startIntent = Intent(context.applicationContext, CastService::class.java)
             startIntent.putExtra("data", data)
             startIntent.putExtra("code", code)
-            context.applicationContext.startForegroundService(startIntent)
+            if (isForeground) {
+                context.applicationContext.startForegroundService(startIntent)
+            } else {
+                context.applicationContext.startService(startIntent)
+            }
         }
     }
 
