@@ -85,6 +85,7 @@ dependencies {
     implementation project(path: ':screenop')
     implementation project(path: ':socket')
     implementation project(path: ':network')
+    implementation project(path: ':injectEvent')
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
