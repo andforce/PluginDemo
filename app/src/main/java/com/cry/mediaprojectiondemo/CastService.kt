@@ -17,6 +17,7 @@ import com.andforce.socket.SocketClient
 import com.cry.mediaprojectiondemo.socket.SocketViewModel
 import com.cry.screenop.coroutine.RecordViewModel
 import com.example.plugindemo.R
+import com.example.plugindemo.installapk.PackageManagerHelper
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -33,7 +34,7 @@ class CastService: Service() {
     private val socketViewModel: SocketViewModel by inject()
     private val networkViewModel: NetworkViewModel by inject()
 
-    private var socketClient: SocketClient = SocketClient("http://192.168.2.183:3001")
+    private var socketClient: SocketClient = SocketClient("http://10.66.32.51:3001")
     companion object {
         const val NOTIFICATION_ID = 1
         // 启动方法
@@ -98,6 +99,18 @@ class CastService: Service() {
         mainScope.launch {
             networkViewModel.stateFlow.collect {
                 Log.d("CastService", "start install : $it")
+                val helper = PackageManagerHelper(applicationContext)
+                helper.registerListener { actionType, success ->
+                    if (actionType == PackageManagerHelper.ACTION_TYPE_INSTALL) {
+                        if (success) {
+                            Toast.makeText(applicationContext, "install apk success", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(applicationContext, "install apk failed", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    Log.d("CastService", "install apk success: $success")
+                }
+                PackageManagerHelper(applicationContext).installPackage(it)
                 Toast.makeText(applicationContext, "start install : $it", Toast.LENGTH_SHORT).show()
             }
         }
